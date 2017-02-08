@@ -1,0 +1,15 @@
+
+int j=0;
+int k_1=1.0;
+int k_2=1.0;
+
+struct Apa
+{
+};
+
+int MyFunc(int j)
+{
+    int i=0;
+}
+
+
