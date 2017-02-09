@@ -22,9 +22,9 @@ void ReportError(const char* error)
 {
     std::cout << error << std::endl;
 }
-CNode* getAST(const char* expr)
+sp<const Ast::CNode> getAST(const char* expr)
 {
-    CNode* rootNode = 0;
+    Ast::CNode* rootNode = 0;
     yyscan_t scanner = 0;
     YY_BUFFER_STATE state = 0;
 
@@ -46,7 +46,7 @@ CNode* getAST(const char* expr)
 
     yylex_destroy(scanner);
 
-    return rootNode;
+    return sp<const Ast::CNode>(rootNode);
 }
 // --------------------------------------------------------------------------------------------------
 int main(int argv, char** argc)
@@ -64,9 +64,9 @@ int main(int argv, char** argc)
                 completeText += line + std::string("\n");
             }
         }
-        if( const CNode* node = getAST(completeText.c_str() ) )
+        if( sp<const Ast::CNode> node = getAST(completeText.c_str() ) )
         {
-            delete node;
+            int i=0; i++;
         }
 
     }

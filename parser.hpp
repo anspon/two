@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
 #ifndef YY_YY_PARSER_HPP_INCLUDED
 # define YY_YY_PARSER_HPP_INCLUDED
-/* Enabling traces.  */
+/* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -40,8 +40,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-/* Line 2058 of yacc.c  */
-#line 20 "parser.y"
+#line 20 "parser.y" /* yacc.c:1909  */
 
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -50,83 +49,67 @@ typedef void* yyscan_t;
 #endif
 
 
+#line 53 "parser.hpp" /* yacc.c:1909  */
 
-/* Line 2058 of yacc.c  */
-#line 56 "parser.hpp"
-
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     TIDENTIFIER = 258,
-     TINTEGER = 259,
-     TDOUBLE = 260,
-     TSTRUCT = 261,
-     TCEQ = 262,
-     TCNE = 263,
-     TCLT = 264,
-     TCLE = 265,
-     TCGT = 266,
-     TCGE = 267,
-     TEQUAL = 268,
-     TLPAREN = 269,
-     TRPAREN = 270,
-     TLBRACE = 271,
-     TRBRACE = 272,
-     TCOMMA = 273,
-     TDOT = 274,
-     TPLUS = 275,
-     TMINUS = 276,
-     TMUL = 277,
-     TDIV = 278,
-     TSEMICOLON = 279
-   };
+  enum yytokentype
+  {
+    TIDENTIFIER = 258,
+    T_I32 = 259,
+    T_I64 = 260,
+    TDOUBLE = 261,
+    TSTRUCT = 262,
+    TCEQ = 263,
+    TCNE = 264,
+    TCLT = 265,
+    TCLE = 266,
+    TCGT = 267,
+    TCGE = 268,
+    TEQUAL = 269,
+    TLPAREN = 270,
+    TRPAREN = 271,
+    TLBRACE = 272,
+    TRBRACE = 273,
+    TCOMMA = 274,
+    TDOT = 275,
+    TPLUS = 276,
+    TMINUS = 277,
+    TMUL = 278,
+    TDIV = 279,
+    TSEMICOLON = 280
+  };
 #endif
 
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
 {
-/* Line 2058 of yacc.c  */
-#line 40 "parser.y"
+#line 40 "parser.y" /* yacc.c:1909  */
 
-    CNode* m_node;
-    CBlock* block;
-    CBlock* blockParts;
-    CExpression *expr;
-    CBlockPart* blockPart;
-    CIdentifier *ident;
-    CVariableDeclaration *var_decl;
-    CVariableDeclaration *func_param;
-    std::vector<CVariableDeclaration*> *varvec;
-    std::vector<CExpression*> *exprvec;
+    Ast::CNode* m_node;
+    Ast::CBlock* block;
+    Ast::CBlock* blockParts;
+    Ast::CExpression* expr;
+    Ast::CBlockPart* blockPart;
+    Ast::CIdentifier* ident;
+    Ast::CVariableDeclaration* var_decl;
+    Ast::CVariableDeclaration* func_param;
+    Ast::VariableListNaked* varvec;
+    Ast::ExpressionListNaked* exprvec;
     std::string *string;
     int token;
 
-
-/* Line 2058 of yacc.c  */
-#line 111 "parser.hpp"
-} YYSTYPE;
+#line 106 "parser.hpp" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
-#else
-int yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int yyparse (CNode **expression, yyscan_t scanner);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
+
+int yyparse (Ast::CNode **expression, yyscan_t scanner);
 
 #endif /* !YY_YY_PARSER_HPP_INCLUDED  */

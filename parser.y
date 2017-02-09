@@ -9,7 +9,7 @@
 
 extern void ReportError(const char* msg );
 
-int yyerror(CNode **expression, yyscan_t scanner, const char *msg) 
+int yyerror(Ast::CNode **expression, yyscan_t scanner, const char *msg) 
 {
     ReportError( msg );
     return 0;
@@ -25,29 +25,29 @@ typedef void* yyscan_t;
 #endif
 
 }
-
 /*
 %output  "Parser.c"
 %defines "Parser.h"
  */
 
+ 
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { CNode **expression }
+%parse-param { Ast::CNode **expression }
 %parse-param { yyscan_t scanner }
 
 /* Represents the many different ways we can access our data */
 %union {
-    CNode* m_node;
-    CBlock* block;
-    CBlock* blockParts;
-    CExpression *expr;
-    CBlockPart* blockPart;
-    CIdentifier *ident;
-    CVariableDeclaration *var_decl;
-    CVariableDeclaration *func_param;
-    std::vector<CVariableDeclaration*> *varvec;
-    std::vector<CExpression*> *exprvec;
+    Ast::CNode* m_node;
+    Ast::CBlock* block;
+    Ast::CBlock* blockParts;
+    Ast::CExpression* expr;
+    Ast::CBlockPart* blockPart;
+    Ast::CIdentifier* ident;
+    Ast::CVariableDeclaration* var_decl;
+    Ast::CVariableDeclaration* func_param;
+    Ast::VariableListNaked* varvec;
+    Ast::ExpressionListNaked* exprvec;
     std::string *string;
     int token;
 }
@@ -56,7 +56,7 @@ typedef void* yyscan_t;
    match our tokens.l lex file. We also define the node type
    they represent.
  */
-%token <string> TIDENTIFIER TINTEGER TDOUBLE TSTRUCT
+%token <string> TIDENTIFIER T_I32 T_I64 TDOUBLE TSTRUCT
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE TEQUAL
 %token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT 
 %token <token> TPLUS TMINUS TMUL TDIV TSEMICOLON
@@ -88,21 +88,21 @@ fileScope :
     ;
       
 blockParts : 
-    blockPart { $$ = new CBlock(); $$->blockParts.push_back($<blockPart>1); } | 
-    blockParts blockPart { $1->blockParts.push_back($<blockPart>2); }
+    blockPart { $$ = new Ast::CBlock(); $$->AddBlockPart($<blockPart>1); } | 
+    blockParts blockPart { $1->AddBlockPart($<blockPart>2); }
     ;
 
 blockPart : 
     var_decl | 
     func_decl | 
     struct_decl | 
-    expr { $$ = new CExpressionStatement(*$1); } |
+    expr { $$ = new Ast::CExpressionStatement($1); } |
     block
     ;
 
 block : 
     TLBRACE blockParts TRBRACE { $$ = $2; } | 
-    TLBRACE TRBRACE { $$ = new CBlock(); }
+    TLBRACE TRBRACE { $$ = new Ast::CBlock(); }
     ;
 
 lparen:
@@ -110,51 +110,51 @@ lparen:
     ;
 
 func_decl : 
-    ident ident lparen func_decl_args TRPAREN block { $$ = new CFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
+    ident ident lparen func_decl_args TRPAREN block { $$ = new Ast::CFunctionDeclaration($1, $2, $4, $6); }
     ;
     
 func_decl_args : 
-    /*blank*/  { $$ = new VariableList(); } | 
-    func_param { $$ = new VariableList(); $$->push_back($<func_param>1); } | 
+    /*blank*/  { $$ = new Ast::VariableListNaked(); } | 
+    func_param { $$ = new Ast::VariableListNaked(); $$->push_back($<func_param>1); } | 
     func_decl_args TCOMMA func_param { $1->push_back($<func_param>3); }
     ;
 
 func_param:
-    ident ident { $$ = new CVariableDeclaration(*$1, *$2); } 
+    ident ident { $$ = new Ast::CVariableDeclaration($1, $2, nullptr); } 
     ;
     
 
 var_decl : 
-    ident ident TSEMICOLON { $$ = new CVariableDeclaration(*$1, *$2); } | 
-    ident ident TEQUAL expr TSEMICOLON { $$ = new CVariableDeclaration(*$1, *$2, $4); }
+    ident ident TSEMICOLON { $$ = new Ast::CVariableDeclaration($1, $2, nullptr); } | 
+    ident ident TEQUAL expr TSEMICOLON { $$ = new Ast::CVariableDeclaration($1, $2, $4); }
     ;
 
 struct_decl :  
-    TSTRUCT ident TLBRACE TRBRACE TSEMICOLON { $$ = new CStructDeclaration(*$2); }
+    TSTRUCT ident TLBRACE TRBRACE TSEMICOLON { $$ = new Ast::CStructDeclaration($2); }
     ;
         
 
 ident : 
-    TIDENTIFIER { $$ = new CIdentifier(*$1); delete $1; }
+    TIDENTIFIER { $$ = new Ast::CIdentifier($1); }
     ;
 
 numeric : 
-    TINTEGER { $$ = new CInteger(*$1); delete $1; } | 
-    TDOUBLE { $$ = new CDouble(*$1); delete $1; }
+    T_I32 { $$ = new Ast::CInteger32($1);} | 
+    TDOUBLE { $$ = new Ast::CDouble($1);}
     ;
     
 expr : 
-    ident TEQUAL expr { $$ = new CAssignment(*$<ident>1, *$3); } | 
-    ident TLPAREN call_args TRPAREN { $$ = new CMethodCall(*$1, *$3); delete $3; } | 
+    ident TEQUAL expr { $$ = new Ast::CAssignment($<ident>1, $3); } | 
+    ident TLPAREN call_args TRPAREN { $$ = new Ast::CMethodCall($1, $3); } | 
     ident { $<ident>$ = $1; } | 
     numeric | 
-    expr comparison expr{ $$ = new CBinaryOperator(*$1, $2, *$3); } | 
+    expr comparison expr{ $$ = new Ast::CBinaryOperator($1, $2, $3); } | 
     TLPAREN expr TRPAREN { $$ = $2; }
     ;
     
 call_args : 
-    /*blank*/  { $$ = new ExpressionList(); } | 
-    expr { $$ = new ExpressionList(); $$->push_back($1); } | 
+    /*blank*/  { $$ = new Ast::ExpressionListNaked; } | 
+    expr { $$ = new Ast::ExpressionListNaked; $$->push_back($1); } | 
     call_args TCOMMA expr  { $1->push_back($3); }
     ;
 

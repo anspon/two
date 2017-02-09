@@ -1,7 +1,8 @@
 
-int j=0;
-int k_1=1.0;
-int k_2=1.0;
+int j=1_000_000i32;
+int k_1=1i32;
+int k_2=1i32;
+double k = 1d;
 
 struct Apa
 {
@@ -9,7 +10,6 @@ struct Apa
 
 int MyFunc(int j)
 {
-    int i=0;
 }
 
 

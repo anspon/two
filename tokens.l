@@ -9,20 +9,21 @@ extern void SaveToken( YYSTYPE* yylval, const char* text , int len );
 //extern "C" int yywrap() { }
 %}
 
+
 /*%option outfile="Lexer.c" header-file="Lexer.h"
 */
 %option warn nodefault
  
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
-
 %%
 
 [ \t\n]                 ;
 "struct"                return TOKEN(TSTRUCT);
-[a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
-[0-9]+\.[0-9]*           SAVE_TOKEN; return TDOUBLE;
-[0-9]+                  SAVE_TOKEN; return TINTEGER;
+[a-zA-Z_][a-zA-Z0-9\_]*  SAVE_TOKEN; return TIDENTIFIER;
+[0-9][0-9\_]*(\.)?[0-9\_]*d      SAVE_TOKEN; return TDOUBLE;
+[0-9][0-9\_]*i32             SAVE_TOKEN; return T_I32;
+[0-9][0-9\_]*i64               SAVE_TOKEN; return T_I64;
 ";"                     return TOKEN(TSEMICOLON);
 "="                     return TOKEN(TEQUAL);
 "=="                    return TOKEN(TCEQ);
