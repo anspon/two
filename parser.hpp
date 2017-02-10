@@ -97,12 +97,15 @@ union YYSTYPE
     Ast::CIdentifier* ident;
     Ast::CVariableDeclaration* var_decl;
     Ast::CVariableDeclaration* func_param;
-    Ast::VariableListNaked* varvec;
-    Ast::ExpressionListNaked* exprvec;
+    Ast::VariableList* varvec;
+    Ast::ExpressionList* exprvec;
     std::string *string;
     int token;
 
-#line 106 "parser.hpp" /* yacc.c:1909  */
+    Ast::CStructPart*     structPart;
+    Ast::StructPartList* structParts;
+
+#line 109 "parser.hpp" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

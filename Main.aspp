@@ -6,6 +6,8 @@ double k = 1d;
 
 struct Apa
 {
+    int a = 7;
+    int j;
 };
 
 int MyFunc(int j)

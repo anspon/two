@@ -407,8 +407,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 26
-#define YY_END_OF_BUFFER 27
+#define YY_NUM_RULES 27
+#define YY_END_OF_BUFFER 28
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -418,10 +418,10 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[45] =
     {   0,
-        0,    0,   27,   25,    1,    1,   25,   15,   16,   23,
-       21,   20,   22,   19,   24,   25,    7,   11,    8,   13,
-        3,    3,   17,   18,   10,    0,    0,    4,    0,   12,
-        9,   14,    3,    3,    0,    0,    0,    3,    5,    6,
+        0,    0,   28,   26,    1,    1,   26,   16,   17,   24,
+       22,   21,   23,   20,   25,    7,    8,   12,    9,   14,
+        3,    3,   18,   19,   11,    0,    7,    4,    0,   13,
+       10,   15,    3,    3,    0,    0,    0,    3,    5,    6,
         3,    3,    2,    0
     } ;
 
@@ -897,104 +897,109 @@ SAVE_TOKEN; return T_I64;
 case 7:
 YY_RULE_SETUP
 #line 27 "tokens.l"
-return TOKEN(TSEMICOLON);
+SAVE_TOKEN; return T_I32;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 28 "tokens.l"
-return TOKEN(TEQUAL);
+return TOKEN(TSEMICOLON);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 29 "tokens.l"
-return TOKEN(TCEQ);
+return TOKEN(TEQUAL);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 30 "tokens.l"
-return TOKEN(TCNE);
+return TOKEN(TCEQ);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 31 "tokens.l"
-return TOKEN(TCLT);
+return TOKEN(TCNE);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 32 "tokens.l"
-return TOKEN(TCLE);
+return TOKEN(TCLT);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 33 "tokens.l"
-return TOKEN(TCGT);
+return TOKEN(TCLE);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 34 "tokens.l"
-return TOKEN(TCGE);
+return TOKEN(TCGT);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 35 "tokens.l"
-return TOKEN(TLPAREN);
+return TOKEN(TCGE);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 36 "tokens.l"
-return TOKEN(TRPAREN);
+return TOKEN(TLPAREN);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 37 "tokens.l"
-return TOKEN(TLBRACE);
+return TOKEN(TRPAREN);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 38 "tokens.l"
-return TOKEN(TRBRACE);
+return TOKEN(TLBRACE);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 39 "tokens.l"
-return TOKEN(TDOT);
+return TOKEN(TRBRACE);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 40 "tokens.l"
-return TOKEN(TCOMMA);
+return TOKEN(TDOT);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 41 "tokens.l"
-return TOKEN(TPLUS);
+return TOKEN(TCOMMA);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 42 "tokens.l"
-return TOKEN(TMINUS);
+return TOKEN(TPLUS);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 43 "tokens.l"
-return TOKEN(TMUL);
+return TOKEN(TMINUS);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 44 "tokens.l"
-return TOKEN(TDIV);
+return TOKEN(TMUL);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 45 "tokens.l"
-printf("Unknown token!n"); yyterminate();
+return TOKEN(TDIV);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 47 "tokens.l"
+#line 46 "tokens.l"
+printf("Unknown token!n"); yyterminate();
+	YY_BREAK
+case 27:
+YY_RULE_SETUP
+#line 48 "tokens.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 997 "tokens.cpp"
+#line 1002 "tokens.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2172,5 +2177,5 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 47 "tokens.l"
+#line 48 "tokens.l"
 

@@ -24,6 +24,7 @@ extern void SaveToken( YYSTYPE* yylval, const char* text , int len );
 [0-9][0-9\_]*(\.)?[0-9\_]*d      SAVE_TOKEN; return TDOUBLE;
 [0-9][0-9\_]*i32             SAVE_TOKEN; return T_I32;
 [0-9][0-9\_]*i64               SAVE_TOKEN; return T_I64;
+[0-9][0-9\_]*               SAVE_TOKEN; return T_I32;
 ";"                     return TOKEN(TSEMICOLON);
 "="                     return TOKEN(TEQUAL);
 "=="                    return TOKEN(TCEQ);

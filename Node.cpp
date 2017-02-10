@@ -8,7 +8,26 @@ CNode::~CNode()
     int i=0; i++;
 }
 // --------------------------------------------------------------------------------------------------
+CInteger32::CInteger32( 
+    const std::string* value
+    )
+{
+    m_value = std::atoi((*value).c_str()); 
+    delete value;
+}
+// --------------------------------------------------------------------------------------------------
 CVariableDeclaration::CVariableDeclaration(
+    const CIdentifier* type, 
+    const CIdentifier* id, 
+    const CExpression* assignmentExpr
+    )
+{
+    m_type = attach_sp(type);
+    m_id = attach_sp(id);
+    m_assignmentExpr = attach_sp(assignmentExpr);
+}
+// --------------------------------------------------------------------------------------------------
+CStructVariableDeclaration::CStructVariableDeclaration(
     const CIdentifier* type, 
     const CIdentifier* id, 
     const CExpression* assignmentExpr
@@ -27,10 +46,17 @@ CExpressionStatement::CExpressionStatement(
 }
 // --------------------------------------------------------------------------------------------------
 CStructDeclaration::CStructDeclaration(
-    const CIdentifier* name
+    const CIdentifier* name,
+    const StructPartList* list 
     )
 {
     m_name = attach_sp(name);
+    if( list )
+    {
+        m_parts = *list;
+        delete list;
+    }
+
 }
 // --------------------------------------------------------------------------------------------------
 CAssignment::CAssignment(
@@ -62,16 +88,13 @@ void CBlock::AddBlockPart(
 // --------------------------------------------------------------------------------------------------
 CMethodCall::CMethodCall(
     const CIdentifier* id, 
-    const ExpressionListNaked* arguments
+    const ExpressionList* arguments
     )
 {
     m_id = attach_sp(id);
     if( arguments )
     {
-        for( const CExpression* expr : *arguments )
-        {
-            m_arguments.push_back( attach_sp(expr) );
-        }
+        m_arguments = *arguments;
         delete arguments;
     }
 }
@@ -79,7 +102,7 @@ CMethodCall::CMethodCall(
 CFunctionDeclaration::CFunctionDeclaration(
         const CIdentifier* type, 
         const CIdentifier* id, 
-        VariableListNaked* arguments, 
+        VariableList* arguments, 
         const CBlockPart* block
         )
 {
@@ -87,11 +110,7 @@ CFunctionDeclaration::CFunctionDeclaration(
     m_id = attach_sp(id);
     if( arguments )
     {
-        for( const CVariableDeclaration* var : *arguments )
-        {
-            m_arguments.push_back( attach_sp(var) );
-        }
-        arguments->clear();
+        m_arguments = *arguments;
         delete arguments;
     }
     m_block = attach_sp(block);

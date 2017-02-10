@@ -46,10 +46,13 @@ typedef void* yyscan_t;
     Ast::CIdentifier* ident;
     Ast::CVariableDeclaration* var_decl;
     Ast::CVariableDeclaration* func_param;
-    Ast::VariableListNaked* varvec;
-    Ast::ExpressionListNaked* exprvec;
+    Ast::VariableList* varvec;
+    Ast::ExpressionList* exprvec;
     std::string *string;
     int token;
+
+    Ast::CStructPart*     structPart;
+    Ast::StructPartList* structParts;
 }
 
 /* Define our terminal symbols (tokens). This should
@@ -71,9 +74,11 @@ typedef void* yyscan_t;
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <blockParts> blockParts 
-%type <blockPart> var_decl func_decl struct_decl blockPart fileScope block 
+%type <blockPart> var_decl func_decl struct blockPart fileScope block  
 %type <func_param> func_param
 %type <token> comparison
+%type <structPart> structPart
+%type <structParts> structParts
 
 /* Operator precedence for mathematical operators */
 %left TPLUS TMINUS
@@ -95,7 +100,7 @@ blockParts :
 blockPart : 
     var_decl | 
     func_decl | 
-    struct_decl | 
+    struct | 
     expr { $$ = new Ast::CExpressionStatement($1); } |
     block
     ;
@@ -109,14 +114,29 @@ lparen:
     TLPAREN
     ;
 
+struct :  
+    TSTRUCT ident TLBRACE structParts TRBRACE TSEMICOLON { $$ = new Ast::CStructDeclaration($2, $4); } |
+    TSTRUCT ident TLBRACE TRBRACE TSEMICOLON { $$ = new Ast::CStructDeclaration($2, nullptr); }
+    ;
+
+structPart : 
+    ident ident TSEMICOLON { $$ = new Ast::CStructVariableDeclaration($1, $2, nullptr); } |
+    ident ident TEQUAL expr TSEMICOLON { $$ = new Ast::CStructVariableDeclaration($1, $2, $4); }
+    ;
+
+structParts: 
+    structPart { $$ = new Ast::StructPartList; $$->push_back(attach_sp($<structPart>1)); } | 
+    structParts structPart { $1->push_back(attach_sp($<structPart>2)); }
+    ;
+
 func_decl : 
     ident ident lparen func_decl_args TRPAREN block { $$ = new Ast::CFunctionDeclaration($1, $2, $4, $6); }
     ;
     
 func_decl_args : 
-    /*blank*/  { $$ = new Ast::VariableListNaked(); } | 
-    func_param { $$ = new Ast::VariableListNaked(); $$->push_back($<func_param>1); } | 
-    func_decl_args TCOMMA func_param { $1->push_back($<func_param>3); }
+    /*blank*/  { $$ = new Ast::VariableList; } | 
+    func_param { $$ = new Ast::VariableList; $$->push_back(attach_sp($<func_param>1)); } | 
+    func_decl_args TCOMMA func_param { $1->push_back(attach_sp($<func_param>3)); }
     ;
 
 func_param:
@@ -129,9 +149,6 @@ var_decl :
     ident ident TEQUAL expr TSEMICOLON { $$ = new Ast::CVariableDeclaration($1, $2, $4); }
     ;
 
-struct_decl :  
-    TSTRUCT ident TLBRACE TRBRACE TSEMICOLON { $$ = new Ast::CStructDeclaration($2); }
-    ;
         
 
 ident : 
@@ -153,9 +170,9 @@ expr :
     ;
     
 call_args : 
-    /*blank*/  { $$ = new Ast::ExpressionListNaked; } | 
-    expr { $$ = new Ast::ExpressionListNaked; $$->push_back($1); } | 
-    call_args TCOMMA expr  { $1->push_back($3); }
+    /*blank*/  { $$ = new Ast::ExpressionList; } | 
+    expr { $$ = new Ast::ExpressionList; $$->push_back(attach_sp($1)); } | 
+    call_args TCOMMA expr  { $1->push_back(attach_sp($3) ); }
     ;
 
 comparison : 

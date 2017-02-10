@@ -21,10 +21,9 @@ namespace Ast
 class CBlockPart;
 class CExpression;
 class CVariableDeclaration;
+class CStructPart;
 
-typedef std::vector< const CVariableDeclaration* > VariableListNaked;
-typedef std::vector< const CExpression* > ExpressionListNaked;
-
+typedef std::vector< sp<const CStructPart> > StructPartList;
 typedef std::vector< sp<const CBlockPart> > BlockPartList;
 typedef std::vector< sp<const CExpression> > ExpressionList;
 typedef std::vector< sp<const CVariableDeclaration> > VariableList;
@@ -47,15 +46,16 @@ class CStatement : public CBlockPart
 {
 };
 
+class CStructPart : public CNode
+{
+};
 class CInteger32 : public CExpression 
 {
 public:
     int32_t m_value;
-    CInteger32(const std::string* value) : 
-        m_value(std::atoi((*value).c_str())) 
-        {
-            delete value;
-        }
+    CInteger32(
+        const std::string* value
+        );
 };
 class CInteger64 : public CExpression 
 {
@@ -92,7 +92,14 @@ public:
     sp<const CIdentifier>
         m_name;
     
-    CStructDeclaration(const CIdentifier* name);
+    CStructDeclaration(
+        const CIdentifier* name,
+        const StructPartList* list 
+        );
+
+private:
+    StructPartList
+        m_parts;
 };
 
 class CMethodCall : public CExpression 
@@ -100,7 +107,7 @@ class CMethodCall : public CExpression
 public:
     CMethodCall(
         const CIdentifier* id, 
-        const ExpressionListNaked* arguments
+        const ExpressionList* arguments
         ) ;
     
    
@@ -187,6 +194,28 @@ public:
         );
 };
 
+
+class CStructVariableDeclaration : public CStructPart
+{
+public:
+
+    CStructVariableDeclaration(
+        const CIdentifier* type, 
+        const CIdentifier* id, 
+        const CExpression* assignmentExpr
+        );
+
+private:
+    sp<const CIdentifier> 
+        m_type;
+    
+    sp<const CIdentifier> 
+        m_id;
+    
+    sp<const CExpression> 
+        m_assignmentExpr;
+};
+
 class CVariableDeclaration : public CStatement 
 {
 public:
@@ -214,7 +243,7 @@ public:
     CFunctionDeclaration(
         const CIdentifier* type, 
         const CIdentifier* id, 
-        VariableListNaked* arguments, 
+        VariableList* arguments, 
         const CBlockPart* block
         );
 
