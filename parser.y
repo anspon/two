@@ -25,11 +25,6 @@ typedef void* yyscan_t;
 #endif
 
 }
-/*
-%output  "Parser.c"
-%defines "Parser.h"
- */
-
  
 %define api.pure
 %lex-param   { yyscan_t scanner }
@@ -45,8 +40,9 @@ typedef void* yyscan_t;
     Ast::CBlockPart* blockPart;
     Ast::CIdentifier* ident;
     Ast::CVariableDeclaration* var_decl;
-    Ast::CVariableDeclaration* func_param;
+    Ast::CFunctionParameter* func_param;
     Ast::VariableList* varvec;
+    Ast::FunctionParameterList* funcParList;
     Ast::ExpressionList* exprvec;
     std::string *string;
     int token;
@@ -71,7 +67,7 @@ typedef void* yyscan_t;
  */
 %type <ident> ident
 %type <expr> numeric expr 
-%type <varvec> func_decl_args
+%type <funcParList> func_decl_args
 %type <exprvec> call_args
 %type <blockParts> blockParts 
 %type <blockPart> var_decl func_decl struct blockPart fileScope block  
@@ -134,13 +130,13 @@ func_decl :
     ;
     
 func_decl_args : 
-    /*blank*/  { $$ = new Ast::VariableList; } | 
-    func_param { $$ = new Ast::VariableList; $$->push_back(attach_sp($<func_param>1)); } | 
+    /*blank*/  { $$ = new Ast::FunctionParameterList; } | 
+    func_param { $$ = new Ast::FunctionParameterList; $$->push_back(attach_sp($<func_param>1)); } | 
     func_decl_args TCOMMA func_param { $1->push_back(attach_sp($<func_param>3)); }
     ;
 
 func_param:
-    ident ident { $$ = new Ast::CVariableDeclaration($1, $2, nullptr); } 
+    ident ident { $$ = new Ast::CFunctionParameter($1, $2, nullptr); } 
     ;
     
 

@@ -87,7 +87,7 @@ typedef void* yyscan_t;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 40 "parser.y" /* yacc.c:1909  */
+#line 35 "parser.y" /* yacc.c:1909  */
 
     Ast::CNode* m_node;
     Ast::CBlock* block;
@@ -96,8 +96,9 @@ union YYSTYPE
     Ast::CBlockPart* blockPart;
     Ast::CIdentifier* ident;
     Ast::CVariableDeclaration* var_decl;
-    Ast::CVariableDeclaration* func_param;
+    Ast::CFunctionParameter* func_param;
     Ast::VariableList* varvec;
+    Ast::FunctionParameterList* funcParList;
     Ast::ExpressionList* exprvec;
     std::string *string;
     int token;
@@ -105,7 +106,7 @@ union YYSTYPE
     Ast::CStructPart*     structPart;
     Ast::StructPartList* structParts;
 
-#line 109 "parser.hpp" /* yacc.c:1909  */
+#line 110 "parser.hpp" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

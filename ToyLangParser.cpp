@@ -1,16 +1,45 @@
+#include "stdafx.h"
+
 #define YY_NO_UNISTD_H 1
 
 #include "Node.h"
 #include "Parser.hpp"
 #include "Tokens.h"
+#include "CodeStreamer.h"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <strstream>
+
+#define filesystem std::experimental::filesystem::v1
+
+namespace Tk
+{
+class CException
+{
+public:
+    CException(const std::string& text ) : m_text(text)
+    {
+    }
+
+    const std::string&
+        Message(
+            )const
+    {
+        return m_text;
+    }
+        
+
+private:
+    std::string 
+        m_text;
+};
+}
+
+void ThrowStream(const std::stringstream& stream )
+{
+    throw Tk::CException(stream.str());
+}
 
 #define A_ASSERT( condition, text )\
-    if(!(condition) ){ std::strstream stream; stream << text; throw std::exception(stream.str()) ;}
+    if(!(condition) ){ std::stringstream stream; stream << text; ThrowStream(stream) ;}
 
 
 void  SaveToken(YYSTYPE* yylval, const char* text, int len)
@@ -53,26 +82,57 @@ int main(int argv, char** argc)
 {
     try
     {
-        A_ASSERT( 2 == argv, "invalid number of arguments provided" );
-        std::string completeText;
-        {            
-            std::ifstream inFile( argc[1] );
-            A_ASSERT( !inFile.bad(), "Unable to open file '" << argc[1] << "'" );
-            char line[1000] = {0};
-            while( inFile.getline(line, 999) )
-            {
-                completeText += line + std::string("\n");
-            }
-        }
-        if( sp<const Ast::CNode> node = getAST(completeText.c_str() ) )
+        A_ASSERT( 3 == argv, "invalid number of arguments provided" );
+
+        filesystem::directory_iterator sourceIterator(argc[1]);
+        A_ASSERT( filesystem::directory_iterator() != sourceIterator, "Invalid source directory '" << argc[1] << "' ");
+
+        filesystem::path buildPath(argc[2]);
+
+        filesystem::path outputPath = buildPath /= "HelloWorld";
+
+        if(!filesystem::exists(outputPath ) )
         {
-            int i=0; i++;
+            bool created = filesystem::create_directory(outputPath);
+            A_ASSERT( created, "Failed to create output directory '" << outputPath << "'" );
+        }
+
+        for( const filesystem::directory_entry& entry : sourceIterator )
+        {
+            const filesystem::path& path = entry.path();
+        
+            if( std::string(".aspp") == path.extension() )
+            {
+                filesystem::path filePath = outputPath /= path.stem();
+                filePath.replace_extension("cpp");
+                CStreamT<std::ofstream> targetFile( filePath );
+
+                int i=0;i++;
+                std::string completeText;
+                {            
+                    std::ifstream inFile( path );
+                    A_ASSERT( !inFile.bad(), "Unable to open file '" << path << "'" );
+                    char line[1000] = {0};
+                    while( inFile.getline(line, 999) )
+                    {
+                        completeText += line + std::string("\n");
+                    }
+                }
+                if( sp<const Ast::CNode> node = getAST(completeText.c_str() ) )
+                {
+                    
+                    CCodeStreamer streamer(targetFile);
+                    node->MakeCpp(streamer);
+                    int i=0; i++;
+                }
+            }        
         }
 
     }
-    catch( std::exception& e )
+    catch( Tk::CException& e )
     {
-        std::cout << e.what() << std::endl;
+        std::cout << e.Message() << std::endl;
+        std::cin.get();
     }
     return 0;
 }

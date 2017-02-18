@@ -6,6 +6,11 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
+
+
+
+class CCodeStreamer;
 
 template<typename T>
 using sp = std::shared_ptr<T>;
@@ -15,6 +20,7 @@ sp<T> attach_sp( T* naked )
 {
     return sp<T>(naked);
 }
+class CCodeStreamer;
 
 namespace Ast
 {
@@ -22,16 +28,24 @@ class CBlockPart;
 class CExpression;
 class CVariableDeclaration;
 class CStructPart;
+class CFunctionParameter;
 
 typedef std::vector< sp<const CStructPart> > StructPartList;
 typedef std::vector< sp<const CBlockPart> > BlockPartList;
 typedef std::vector< sp<const CExpression> > ExpressionList;
 typedef std::vector< sp<const CVariableDeclaration> > VariableList;
+typedef std::vector< sp<const CFunctionParameter> > FunctionParameterList;
 
 class CNode 
 {
 public:
     virtual ~CNode();
+
+    virtual void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const;
+private:
 };
 
 class CBlockPart : public CNode 
@@ -48,56 +62,96 @@ class CStatement : public CBlockPart
 
 class CStructPart : public CNode
 {
+public:
+    CStructPart();
 };
-class CInteger32 : public CExpression 
+
+class CLiteral : public CExpression
+{
+};
+class CInteger32 : public CLiteral 
 {
 public:
     int32_t m_value;
     CInteger32(
         const std::string* value
         );
+
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const;
+
 };
-class CInteger64 : public CExpression 
+class CInteger64 : public CLiteral 
 {
 public:
-    int64_t m_value;
-    CInteger64(const std::string* value) : 
-        m_value(std::atoll((*value).c_str())) 
-        {
-            delete value;
-        }
+    CInteger64(
+        const std::string* value
+        );
+
+    int64_t 
+        m_value;
+
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+    
+    std::string
+        m_originalText;
 };
 
-class CDouble : public CExpression 
+class CDouble : public CLiteral 
 {
 public:
-    double m_value;
-    CDouble(const std::string* value) : 
-        m_value(atof((*value).c_str()) ) 
-        { 
-            delete value;
-        }
+    CDouble(
+        const std::string* value
+        );
+    
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+       
+private:    
+    double 
+        m_value;
+
+    std::string 
+        m_originalText;    
 };
 
 class CIdentifier : public CExpression 
 {
 public:
-    std::string m_name;
     CIdentifier(const std::string* name) : m_name(*name) {delete name; }
+    
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+
+    std::string m_name;
 };
 
 class CStructDeclaration : public CStatement
 {
 public:
-    sp<const CIdentifier>
-        m_name;
-    
     CStructDeclaration(
         const CIdentifier* name,
         const StructPartList* list 
         );
 
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const;
+
 private:
+    sp<const CIdentifier>
+        m_name;
+
     StructPartList
         m_parts;
 };
@@ -110,7 +164,6 @@ public:
         const ExpressionList* arguments
         ) ;
     
-   
 private:
     sp<const CIdentifier>
         m_id;
@@ -149,7 +202,6 @@ public:
         const CExpression* rhs
         );
 
-
 private:
     sp<const CIdentifier> 
         m_lhs;
@@ -167,6 +219,11 @@ public:
             const CBlockPart* part
             );
 
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override ;
+
 private:        
     BlockPartList 
         m_blockParts;
@@ -182,7 +239,6 @@ class CFileScope : public CScope
 
 };
 
-
 class CExpressionStatement : public CStatement 
 {
 public:
@@ -192,6 +248,12 @@ public:
     CExpressionStatement(
         const CExpression* expression
         );
+
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+
 };
 
 
@@ -204,6 +266,36 @@ public:
         const CIdentifier* id, 
         const CExpression* assignmentExpr
         );
+    
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+private:
+    sp<const CIdentifier> 
+        m_type;
+    
+    sp<const CIdentifier> 
+        m_id;
+    
+    sp<const CExpression> 
+        m_assignmentExpr;
+};
+
+class CFunctionParameter : public CStatement 
+{
+public:
+
+    CFunctionParameter(
+        const CIdentifier* type, 
+        const CIdentifier* id, 
+        const CExpression* assignmentExpr
+        );
+
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
 
 private:
     sp<const CIdentifier> 
@@ -226,6 +318,11 @@ public:
         const CExpression* assignmentExpr
         );
 
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
+
 private:
     sp<const CIdentifier> 
         m_type;
@@ -243,24 +340,32 @@ public:
     CFunctionDeclaration(
         const CIdentifier* type, 
         const CIdentifier* id, 
-        VariableList* arguments, 
+        FunctionParameterList* arguments, 
         const CBlockPart* block
         );
 
+    void 
+        MakeCpp(
+            CCodeStreamer& streamer
+            )const override;
 
 private:
     sp<const CIdentifier> 
         m_type;
+
     sp<const CIdentifier> 
         m_id;
     
-    VariableList 
+    FunctionParameterList 
         m_arguments;
     
     sp<const CBlockPart> 
         m_block;
 
 };
+
+CCodeStreamer& operator<<(CCodeStreamer& streamer, sp<const CNode> node );
+
 
 }
 #endif // __EXPRESSION_H__

@@ -1,5 +1,6 @@
 
 %{
+#include "stdafx.h"
 #include <string>
 #include "Node.h"
 #include "parser.hpp"
